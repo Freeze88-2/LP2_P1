@@ -86,7 +86,8 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
                 {
                     if (!board[f, j].HasValue)
                     {
-                        if (f - 1 >= 0 &&  j - 1 >= 0 && j + 1 <= board.cols - 1)
+                        // Both sides
+                        if (f - 1 >= 0 && j - 1 >= 0 && j + 1 <= board.cols - 1)
                         {
                             if (board[f - 1, j - 1].HasValue && board[f - 1, j + 1].HasValue)
                             {
@@ -130,36 +131,39 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
                         }
 
 
-
-                        if (f - 2 >= 0 && j - 1 >= 0 && j + 1 <= board.cols - 1)
+                        // Diagonals
+                        if (f - 2 >= 0 && j - 1 >= 0 && j + 1 <= board.cols - 1 )
                         {
-                            if (board[f - 2, j - 1].HasValue && board[f - 2, j + 1].HasValue)
+                            if (f - 3 >= 0 && j + 2 <= board.cols - 1)
                             {
-                                if ((board[f - 2, j + 1].Value.shape == turn.Shape() || board[f - 2, j + 1].Value.color == turn) &&
-                                    (board[f - 2, j - 1].Value.shape == turn.Shape() || board[f - 2, j - 1].Value.color == turn))
+                                if (board[f - 3, j + 2].HasValue && board[f - 2, j + 1].HasValue)
                                 {
-                                    boardValue += 10;
-                                }
-                                if ((board[f - 2, j + 1].Value.shape == turn.Other().Shape() || board[f - 2, j + 1].Value.color == turn.Other()) &&
-                                    (board[f - 2, j - 1].Value.shape == turn.Other().Shape() || board[f - 2, j - 1].Value.color == turn.Other()))
-                                {
-                                    boardValue -= 10;
+                                    if ((board[f - 2, j + 1].Value.shape == turn.Shape() || board[f - 2, j + 1].Value.color == turn) &&
+                                        (board[f - 3, j + 2].Value.shape == turn.Shape() || board[f - 3, j + 2].Value.color == turn))
+                                    {
+                                        boardValue += 10;
+                                    }
+                                    if ((board[f - 2, j + 1].Value.shape == turn.Other().Shape() || board[f - 2, j + 1].Value.color == turn.Other()) &&
+                                        (board[f - 3, j + 2].Value.shape == turn.Other().Shape() || board[f - 3, j + 2].Value.color == turn.Other()))
+                                    {
+                                        boardValue -= 10;
+                                    }
                                 }
                             }
-                            else if (board[Math.Max(0, f - 1), Math.Min(board.cols - 1, j + 1)].HasValue)
+                            else if (board[f - 2, j + 1].HasValue)
                             {
-                                if (board[f - 1, j + 1].Value.shape == turn.Shape()
-                                    || board[f - 1, j + 1].Value.color == turn)
+                                if (board[f - 2, j + 1].Value.shape == turn.Shape()
+                                    || board[f - 2, j + 1].Value.color == turn)
                                 {
                                     boardValue += 2;
                                 }
-                                if (board[f - 1, j + 1].Value.shape == turn.Other().Shape()
-                                    || board[f - 1, j + 1].Value.color == turn.Other())
+                                if (board[f - 2, j + 1].Value.shape == turn.Other().Shape()
+                                    || board[f - 2, j + 1].Value.color == turn.Other())
                                 {
                                     boardValue -= 2;
                                 }
                             }
-                            else if (board[Math.Max(0, f - 2), Math.Max(0, j - 1)].HasValue)
+                            else if (board[f - 2, j - 1].HasValue)
                             {
                                 if (board[f - 2, j - 1].Value.shape == turn.Shape()
                                     || board[f - 2, j - 1].Value.color == turn)
@@ -174,8 +178,7 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
                             }
                         }
 
-
-
+                        // Down
                         if (f - 2 >= 0 && f - 3 >= 0)
                         {
                             if (board[f - 2, j].HasValue && board[f - 3, j].HasValue)
@@ -204,7 +207,7 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
                                     boardValue -= 2;
                                 }
                             }
-                            else if (board[f - 3,j].HasValue)
+                            else if (board[f - 3, j].HasValue)
                             {
                                 if (board[f - 3, j].Value.shape == turn.Shape()
                                     || board[f - 3, j].Value.color == turn)
