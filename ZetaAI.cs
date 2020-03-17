@@ -12,7 +12,7 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
         {
             maxDepth = 3;
             (FutureMove, float) mov = (NegaMax(board, board.Turn, 0, float.NegativeInfinity, float.PositiveInfinity, ct));
-            Console.WriteLine(mov.Item2);
+            //Console.WriteLine(mov.Item2);
             return mov.Item1;
         }
 
@@ -22,11 +22,11 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
             {
                 if (board.CheckWinner() == turn.ToWinner())
                 {
-                    return (FutureMove.NoMove, float.PositiveInfinity);
+                    return (FutureMove.NoMove, float.MaxValue);
                 }
                 else if (board.CheckWinner() == turn.Other().ToWinner())
                 {
-                    return (FutureMove.NoMove, float.NegativeInfinity);
+                    return (FutureMove.NoMove, float.MinValue);
                 }
                 else
                     return (FutureMove.NoMove, 0);
