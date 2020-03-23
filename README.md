@@ -1,6 +1,6 @@
 # IA Project 1
 
-## Moon Buggy
+## ZetaAI
 
 ### Authors
 
@@ -23,9 +23,9 @@
 
 <https://github.com/Freeze88-2/LP2_P1.git>
 
-### Describing Solution approach
+### Describing Algorithmical search
 
-
+### Heuristic approach
 
 ### Flow Chart
 Only if we want to explain our solution in a graphic way
