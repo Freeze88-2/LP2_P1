@@ -6,7 +6,7 @@
 
 **Ana Dos Santos** - a21900297 [AnSantos99](https://github.com/AnSantos99)
 
-**André Vitorino** - a21902663 [Freeze88-2](https://github.com/Freeze88-2)
+**André Vitorino**  - a21902663 [Freeze88-2](https://github.com/Freeze88-2)
 
 **Catarina Matias** - a21801693 [StarryNight00](https://github.com/StarryNight00)
 
