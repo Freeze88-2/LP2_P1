@@ -1,34 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
 namespace ColorShapeLinks.Common.AI.ZetaAI
 {
-    class ZetaAI : AbstractThinker
+    internal class ZetaAI : AbstractThinker
     {
         private readonly float winScore = 100000;
         private int maxDepth;
         private IEnumerable<Pos>[] positions;
         private bool firsttime;
         private readonly ZetaHeuristic heuristic;
+        private Stopwatch timer;
+        private Stopwatch functionTime;
 
+        /// <summary>
+        /// Constructor of the ZetaAI class
+        /// </summary>
         public ZetaAI()
         {
             heuristic = new ZetaHeuristic();
             firsttime = true;
+            timer = new Stopwatch();
+            functionTime = new Stopwatch();
         }
+
         /// <summary>
-        /// The Setup() method, optional override
+        /// Allows the AI to display versions when called ToString
         /// </summary>
-        /// <param name="str"> A string of the argument passed </param>
-        public override void Setup(string str)
+        /// <returns> The new name of the AI </returns>
+        public override string ToString()
         {
-            // Try to get the maximum depth from the parameters
-            if (!int.TryParse(str, out maxDepth))
-            {
-                // If not possible, set it to 3 by default
-                maxDepth = 3;
-            }
+            return "ZetaAI_pack2";
         }
 
         /// <summary>
@@ -39,15 +44,53 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
         /// <returns></returns>
         public override FutureMove Think(Board board, CancellationToken ct)
         {
+            // Starts the timer for the whole AI
+            timer.Restart();
+
+            // Sets the maximum depth to one
+            maxDepth = 1;
+
+            // If it's the first time converts the wincorridors to array
             if (firsttime)
             {
                 positions = board.winCorridors.ToArray();
                 firsttime = false;
             }
-            // Invokes the NegaMax method returning a value and a furture move
-            (FutureMove move, float value) b = NegaMax(board.Copy(), board.Turn, 0, float.NegativeInfinity,
-                float.PositiveInfinity, ct);
 
+            // Starts the timer for running the function at one depth
+            functionTime.Restart();
+
+            (FutureMove move, float value) b = NegaMax(board.Copy(), board.Turn
+                , 0, float.NegativeInfinity, float.PositiveInfinity, ct);
+
+            // Stops the timer after the function ends
+            functionTime.Stop();
+
+            // Resets the maximum depth to 0
+            maxDepth = 0;
+
+            // Number of boards one cycle takes
+            int boardCount = board.cols * 2;
+
+            // Cheks if the AI still has time
+            while (timer.ElapsedMilliseconds + (Math.Pow(boardCount, maxDepth
+                + 1) * (functionTime.ElapsedMilliseconds / Math.Pow(boardCount,
+                maxDepth + 1))) < TimeLimitMillis * 0.2f)
+            {
+                // Increments the depth by one
+                maxDepth++;
+
+                // Calss the NegaMax method returning a furture move and value
+                b = NegaMax(board.Copy(), board.Turn, 0, float.NegativeInfinity
+                    , float.PositiveInfinity, ct);
+
+                if (b.value == winScore)
+                    break;
+            }
+            // Stops the timer
+            timer.Stop();
+
+            // Returns the intended move
             return b.move;
         }
 
@@ -89,7 +132,8 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
             else if (depth == maxDepth)
             {
                 // Finds the heuristic value of the board and returns it
-                return (FutureMove.NoMove, heuristic.HeuristicValue(board, turn, positions));
+                return (FutureMove.NoMove, heuristic.HeuristicValue(board,
+                    turn, positions));
             }
             // If none of the above
             else
@@ -101,7 +145,7 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
                 // Runs a cycle for each collumn in the board
                 for (int colsN = 0; colsN < board.cols; colsN++)
                 {
-                    // If the collumn is full it skips the rest 
+                    // If the collumn is full it skips the rest
                     if (board.IsColumnFull(colsN))
                     {
                         continue;
@@ -125,7 +169,8 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
 
                         // Creates a score variable and assigns it the value
                         // given by an iteration of the NegaMax method
-                        float score = -NegaMax(board, turn.Other(), depth + 1, -beta, -alpha, ct).value;
+                        float score = -NegaMax(board, turn.Other(), depth + 1,
+                            -beta, -alpha, ct).value;
 
                         // Undos the move done
                         board.UndoMove();
@@ -153,8 +198,3 @@ namespace ColorShapeLinks.Common.AI.ZetaAI
         }
     }
 }
-
-
-
-
-
