@@ -1,154 +1,200 @@
-﻿using System.Threading;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 
 namespace ColorShapeLinks.Common.AI.ZetaAI
 {
     internal class ZetaAI : AbstractThinker
     {
+        private readonly float winScore = 100000;
         private int maxDepth;
-        private float pieceValue = 5;
-        private float extraPieceValue = 1;
-        private PColor player;
+        private IEnumerable<Pos>[] positions;
+        private bool firsttime;
+        private readonly ZetaHeuristic heuristic;
+        private Stopwatch timer;
+        private Stopwatch functionTime;
+
+        /// <summary>
+        /// Constructor of the ZetaAI class
+        /// </summary>
+        public ZetaAI()
+        {
+            heuristic = new ZetaHeuristic();
+            firsttime = true;
+            timer = new Stopwatch();
+            functionTime = new Stopwatch();
+        }
+
+        /// <summary>
+        /// Allows the AI to display versions when called ToString
+        /// </summary>
+        /// <returns> The new name of the AI </returns>
+        public override string ToString()
+        {
+            return "ZetaAI_pack2";
+        }
+
+        /// <summary>
+        /// The Think method (mandatory override) is invoked by the game engine
+        /// </summary>
+        /// <param name="board"> The current state of the board </param>
+        /// <param name="ct"> A cancelletion token </param>
+        /// <returns></returns>
         public override FutureMove Think(Board board, CancellationToken ct)
         {
-            player = board.Turn;
-            maxDepth = 2;
-            (FutureMove, float) mov = (NegaMax(board, 0, float.NegativeInfinity, float.PositiveInfinity, ct));
-            Console.WriteLine(mov.Item2);
-            return mov.Item1;
+            // Starts the timer for the whole AI
+            timer.Restart();
+
+            // Sets the maximum depth to one
+            maxDepth = 1;
+
+            // If it's the first time converts the wincorridors to array
+            if (firsttime)
+            {
+                positions = board.winCorridors.ToArray();
+                firsttime = false;
+            }
+
+            // Starts the timer for running the function at one depth
+            functionTime.Restart();
+
+            (FutureMove move, float value) b = NegaMax(board.Copy(), board.Turn
+                , 0, float.NegativeInfinity, float.PositiveInfinity, ct);
+
+            // Stops the timer after the function ends
+            functionTime.Stop();
+
+            // Resets the maximum depth to 0
+            maxDepth = 0;
+
+            // Number of boards one cycle takes
+            int boardCount = board.cols * 2;
+
+            // Cheks if the AI still has time
+            while (timer.ElapsedMilliseconds + (Math.Pow(boardCount, maxDepth
+                + 1) * (functionTime.ElapsedMilliseconds / Math.Pow(boardCount,
+                maxDepth + 1))) < TimeLimitMillis * 0.2f)
+            {
+                // Increments the depth by one
+                maxDepth++;
+
+                // Calss the NegaMax method returning a furture move and value
+                b = NegaMax(board.Copy(), board.Turn, 0, float.NegativeInfinity
+                    , float.PositiveInfinity, ct);
+
+                if (b.value == winScore)
+                    break;
+            }
+            // Stops the timer
+            timer.Stop();
+
+            // Returns the intended move
+            return b.move;
         }
 
-        private (FutureMove move, float value) NegaMax(Board board, int depth, float alpha, float beta, CancellationToken ct)
+        /// <summary>
+        /// NegaMax method responsible for finding the best move
+        /// </summary>
+        /// <param name="board"> The current board </param>
+        /// <param name="turn"> Who's turn it is </param>
+        /// <param name="depth"> The current depth </param>
+        /// <param name="alpha"> Alpha value </param>
+        /// <param name="beta"> Beta value </param>
+        /// <param name="ct"> Cancellation token </param>
+        /// <returns> A future move and a value </returns>
+        private (FutureMove move, float value) NegaMax(Board board, PColor turn
+            , int depth, float alpha, float beta, CancellationToken ct)
         {
-           
+            // Checks if a cancelletion was called
+            if (ct.IsCancellationRequested)
+            {
+                return (FutureMove.NoMove, 0);
+            }
+
+            // Checks if there's a winner
             if (board.CheckWinner() != Winner.None)
             {
-                if (board.CheckWinner() == board.Turn.ToWinner())
+                // If the winner is the current player
+                if (board.CheckWinner() == turn.ToWinner())
                 {
-                    return (FutureMove.NoMove, float.PositiveInfinity);
-                }
-                else if (board.CheckWinner() == board.Turn.Other().ToWinner())
-                {
-                    return (FutureMove.NoMove, float.NegativeInfinity);
+                    // Returns the maximum socre
+                    return (FutureMove.NoMove, winScore);
                 }
                 else
-                    return (FutureMove.NoMove, 0);
+                {
+                    // Returns the minimum score
+                    return (FutureMove.NoMove, -winScore);
+                }
             }
-            else if (depth >= maxDepth)
+            // Checks if the current depth is the maximum
+            else if (depth == maxDepth)
             {
-                    float v = heuristicValue(board);
-                    //Console.WriteLine("Turn : " + board.Turn.ToString() + "   :   " + (board.Turn == player ? v : -v));
-                    return (FutureMove.NoMove, (board.Turn == player ? v : -v));
+                // Finds the heuristic value of the board and returns it
+                return (FutureMove.NoMove, heuristic.HeuristicValue(board,
+                    turn, positions));
             }
+            // If none of the above
             else
             {
-                (FutureMove move, float value) bestMove = (FutureMove.NoMove, float.NegativeInfinity);
+                // Creates a variable with a future move and value
+                (FutureMove move, float value) bestMove =
+                    (FutureMove.NoMove, float.NegativeInfinity);
 
-                for (int b = 0; b < 2; b++)
+                // Runs a cycle for each collumn in the board
+                for (int colsN = 0; colsN < board.cols; colsN++)
                 {
-                    for (int i = 0; i < board.cols - 1; i++)
+                    // If the collumn is full it skips the rest
+                    if (board.IsColumnFull(colsN))
                     {
-                        if (!board.IsColumnFull(i))
+                        continue;
+                    }
+
+                    // A loop for checking both square and circle pieces
+                    for (int shapeN = 0; shapeN < 2; shapeN++)
+                    {
+                        // Checks if the current player has pieces of the type
+                        if (board.PieceCount(turn, (PShape)shapeN) == 0)
                         {
-                            FutureMove pos;
+                            continue;
+                        }
 
-                            pos = (b == 0 ? new FutureMove(i, PShape.Round) : new FutureMove(i, PShape.Square));
+                        // Creates a new FutureMove with the current collumn
+                        // and the PShape type acording to b
+                        FutureMove pos = new FutureMove(colsN, (PShape)shapeN);
 
-                            //Console.WriteLine(pos.shape);
+                        // Does a move on the board with the pos values
+                        board.DoMove(pos.shape, pos.column);
 
-                            if (board.PieceCount(board.Turn, pos.shape) == 0)
-                                pos = pos.shape == PShape.Square ? new FutureMove(i, PShape.Round) : new FutureMove(i, PShape.Square);
+                        // Creates a score variable and assigns it the value
+                        // given by an iteration of the NegaMax method
+                        float score = -NegaMax(board, turn.Other(), depth + 1,
+                            -beta, -alpha, ct).value;
 
-                            if (board.PieceCount(board.Turn, PShape.Round) == 0 && board.PieceCount(board.Turn, PShape.Square) == 0)
-                                break;
+                        // Undos the move done
+                        board.UndoMove();
 
-                            float score;
+                        // Checks if the score of a board is bigger than alpha
+                        if (score > alpha)
+                        {
+                            // Assigns the value of aplha the value of score
+                            alpha = score;
+                            // Assigns the bestMove the value of pos and alpha
+                            bestMove = (pos, alpha);
 
-                            board.DoMove(pos.shape, pos.column);
-
-                            score = -NegaMax(board.Copy(), depth +1, -beta, -alpha, ct).value;
-
-                            board.UndoMove();
-
-                            if (score > bestMove.value)
+                            // Checks if there's Alpha Beta cuts
+                            if (alpha >= beta)
                             {
-                                alpha = score;
-
-                                bestMove.value = score;
-                                bestMove.move = pos;
-
-                                if (alpha >= beta) return bestMove;
+                                // If there is returns the current bestMove
+                                return bestMove;
                             }
                         }
                     }
                 }
+                // If all else fails returns the current bestMove
                 return bestMove;
             }
-        }
-
-        private float heuristicValue(Board board)
-        {
-            float boardValue = pieceValue;
-            for (int j = 0; j < board.cols -1; j++)
-            {
-                for (int f = 0; f < board.rows; f++)
-                {
-                    if (!board[f, j].HasValue)
-                    {
-                        if (board[Math.Max(0, f - 1), j].HasValue)
-                        {
-                            if (board[Math.Max(0, f - 1), j].Value.shape == board.Turn.Shape()
-                                || board[Math.Max(0, f - 1), j].Value.color == board.Turn)
-                            {
-                                boardValue += 2;
-                            }
-                            else
-                                boardValue -= 1;
-                        }
-                        if (board[Math.Max(0, f - 1), Math.Max(0, j - 1)].HasValue)
-                        {
-                            if (board[Math.Max(0, f - 1), Math.Max(0, j - 1)].Value.shape == board.Turn.Shape()
-                                || board[Math.Max(0, f - 1), Math.Max(0, j - 1)].Value.color == board.Turn)
-                            {
-                                boardValue += 1;
-                            }
-                            else
-                                boardValue -= 2;
-                        }
-                        if (board[Math.Max(0, f - 1), Math.Min(board.cols, j + 1)].HasValue)
-                        {
-                            if (board[Math.Max(0, f - 1), Math.Min(board.cols, j + 1)].Value.shape == board.Turn.Shape()
-                                || board[Math.Max(0, f - 1), Math.Min(board.cols, j + 1)].Value.color == board.Turn)
-                            {
-                                boardValue += 1;
-                            }
-                            else
-                                boardValue -= 2;
-                        }
-                        if (board[Math.Max(0, f - 2), Math.Max(0, j - 1)].HasValue)
-                        {
-                            if (board[Math.Max(0, f - 2), Math.Max(0, j - 1)].Value.shape == board.Turn.Shape()
-                                || board[Math.Max(0, f - 2), Math.Max(0, j - 1)].Value.color == board.Turn)
-                            {
-                                boardValue += 1;
-                            }
-                            else
-                                boardValue -= 2;
-                        }
-                        if (board[Math.Max(0, f - 2), Math.Max(0, j + 1)].HasValue)
-                        {
-                            if (board[Math.Max(0, f - 2), Math.Min(board.cols, j + 1)].Value.shape == board.Turn.Shape()
-                                || board[Math.Max(0, f - 2), Math.Min(board.cols, j + 1)].Value.color == board.Turn)
-                            {
-                                boardValue += 1;
-                            }
-                            else
-                                boardValue -= 2;
-                        }
-                    }
-                }
-            }
-            return (boardValue * 100);
         }
     }
 }
