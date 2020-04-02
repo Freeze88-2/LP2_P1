@@ -12,15 +12,15 @@
 
 ## Tasks of each group member
 
-## Ana Dos Santos
+### Ana Dos Santos
 
 Solution Brainstorming, Heuristic refinement
 
-## André Vitorino
+### André Vitorino
 
 AI programming and algorithm implementation, Heuristic refinement, Solution brainstorming
 
-## Catarina Matias
+### Catarina Matias
 
 Primary Heuristic, Solution brainstorming
 
@@ -29,8 +29,6 @@ Primary Heuristic, Solution brainstorming
 ### Introduction
 
 ### Describing search algorithm
-
-Only if we want to explain our solution in a graphic way
 
 ### Heuristic
 
