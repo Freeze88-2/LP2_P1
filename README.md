@@ -1,16 +1,10 @@
 # IA_Project_01 - ZetaAI
 
-**Ana Dos Santos** - a21900297
+**Ana Dos Santos** - a21900297 [AnSantos99](https://github.com/AnSantos99)
 
-[AnSantos99](https://github.com/AnSantos99)
+**André Vitorino**  - a21902663 [Freeze88-2](https://github.com/Freeze88-2)
 
-**André Vitorino**  - a21902663
-
-[Freeze88-2](https://github.com/Freeze88-2)
-
-**Catarina Matias** - a21801693
-
-[StarryNight00](https://github.com/StarryNight00)
+**Catarina Matias** - a21801693 [StarryNight00](https://github.com/StarryNight00)
 
 ## Github Repository
 
@@ -38,7 +32,12 @@ creation and testing.
 
 ### Catarina Matias
 
-Primary Heuristic, Solution brainstorming
+The student developed the primary heuristic used. She also helped with
+brainstorming more improvements, often running “paper-tests” on how it
+could better perform. In the end, She helped with writing the readme file,
+formatting and writing the Introduction and NegaMax chapters. In the final
+verifications, she helped with grammar and spelling errors on both the readme
+and the code.
 
 ## Architecture
 
@@ -84,6 +83,20 @@ the code would receive a 5, but it’s already the sixth time the algorithm woul
 be running, so the values are returned with a `NoMove` order that allows for the
 upper part of the code to read the `bestMove` discerned through the last runs].
 
+Finally, there’s the `for-loop` cycle that runs if none of these conditions
+were met, and where which `move` is the `bestMove` is decided. First, it
+creates a variable `bestMove` to save the move in. Then the algorithm enters a
+`for-loop` that checks each column twice, once for each available piece shape,
+and also checks if the algorithm player still has pieces of said shape.
+It starts by placing the piece with `DoMove`, and immediately after calls on
+itself, `NegaMax`, negates it and increments the `depth`, this way playing the
+adversary, and intercalating between itself and the adversary each time
+`NegaMax` is negated. Once it gets to the max depth of the inspection branch it
+performs the alpha-beta cuts. By comparing each move value with the highest
+attained value so far, is the new value is smaller, it won’t look more into this
+branch and save running time, for both columns and shapes. In the end, the
+best position and shape, `bestMove`, is returned to be played.
+
 ### Heuristic
 
 The heuristic in this project has the task to check out the values of the board
@@ -103,7 +116,7 @@ being that after resetting, instead of checking the color it will check the
 form and so on.
 
 The following flowchart represents the functionality of this heuristic where
-the first step is the storing of the current board values and after that the
+the first step is the storing of the current board values and after that, the
 AI goes through various positions in the board to check the states of it
 (in this case if there are any objects or empty spaces).
 
@@ -115,33 +128,35 @@ of that object in that position. If the object is the same colour as the colour
 of the current player then there is going to be an addition of 1 doing the same
 for the next coming pieces that are going to come.
 
-In case the next piece is not of it’s color or shape (depending on what is checking at the time) it resets the number to 0 and starts counting the
+In case the next piece is not of its color or shape (depending on what is
+checking at the time) it resets the number to 0 and starts counting the
 other player.
 
 In the following example the Heuristic is checking first if there is and objects
 in the current position. Since there is one, the Heuristic is checking what
-color that object has. Since the color is equal to last turns colour there
-is an the addition of 1 for the upcoming pieces.
+color that object has. Since the color is equal to last turn's color, there
+is an addition of 1 for the upcoming pieces.
 
 ![heuristic_01](heuristic_01.png)
 
 In other scenarios in case there is non-existent piece in the beginning, middle
-or in the end of a line, that/those position/s will be saved/stored for later
+or at the end of a line, that/those position/s will be saved/stored for later
 when the line reaches its limits or has two empty spaces. That will be verified
 like this:
 
--If there is a empty space that has an piece underneath which means there is a
+-If there is an empty space that has a piece underneath which means there is a
 possibility to put another piece above that piece in the next turn, he gets
-50 point for the next piece in that position.
+50 points for the next piece in that position.
 
 ![heuristic_02](heuristic_02.png)
 
 This means that this Heuristic depends on giving values to the pieces depending
-on the best possible move so if there is a possibility on winning ZetaHeuristic
+on the best possible move so if there is a possibility of winning ZetaHeuristic
 will keep on adding points to the pieces that land on that favorable position.
-The better the position and amount in row the more points and, the less
-favorable position and amount in row the less the points. After that the whole
-cycle starts again but this time instead of checking the colours it will check the form of the objects.
+The better the position and amount in a row the more points and, the less
+favorable position and amount in row the less the points. After that, the whole
+cycle starts again but this time instead of checking the colours it will check
+the form of the objects.
 
 ![heuristic_cycle](heuristic_cycle.png)
 
