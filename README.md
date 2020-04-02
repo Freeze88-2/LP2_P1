@@ -1,10 +1,16 @@
 # IA_Project_01 - ZetaAI
 
-**Ana Dos Santos** - a21900297 [AnSantos99](https://github.com/AnSantos99)
+**Ana Dos Santos** - a21900297
 
-**André Vitorino**  - a21902663 [Freeze88-2](https://github.com/Freeze88-2)
+[AnSantos99](https://github.com/AnSantos99)
 
-**Catarina Matias** - a21801693 [StarryNight00](https://github.com/StarryNight00)
+**André Vitorino**  - a21902663
+
+[Freeze88-2](https://github.com/Freeze88-2)
+
+**Catarina Matias** - a21801693
+
+[StarryNight00](https://github.com/StarryNight00)
 
 ## Github Repository
 
@@ -14,11 +20,21 @@
 
 ### Ana Dos Santos
 
-Solution Brainstorming, Heuristic refinement
+The student helped with the brainstorming on the heuristic made researches on
+the internet to help out other group members in solving problems.
+Also, the student helped with the refinements of the heuristic, formatted the
+readme file, wrote the heuristic text on the readme and created all
+the graphics.
 
 ### André Vitorino
 
-AI programming and algorithm implementation, Heuristic refinement, Solution brainstorming
+The student did all of the programming on the AI, including two classes
+(ZetaAI and ZetaHeuristc) using the NegaMax search algorithm and implementing
+the heuristic discussed with the colleagues, along with some optimizations
+researched by the previous student.
+The student barely helped with the heuristic itself during brainstorming,
+instead making small code changes or tweaks to values during its
+creation and testing.
 
 ### Catarina Matias
 
@@ -76,14 +92,14 @@ are divided in the following way:
 
 -The Research of positions in rows
 -Resetting of values
--Checking Objects by its colour
+-Checking Objects by its color
 -Checking Objects by its form
 
 Before going deeply into the explanation of each tasks, it's important to know
 that this Heuristic works by checking its surroundings and setting values that
 depend on the turn and position also by form and colour of the objects.
 It also resets all values except the value of the actual board the difference
-being that after reseting, instead of checking the colour it will check the
+being that after resetting, instead of checking the color it will check the
 form and so on.
 
 The following flowchart represents the functionality of this heuristic where
@@ -99,12 +115,12 @@ of that object in that position. If the object is the same colour as the colour
 of the current player then there is going to be an addition of 1 doing the same
 for the next coming pieces that are going to come.
 
-In case the next piece is not of it’s color or shape (depending on what is checking
-at the time) it resets the number to 0 and starts counting the other player.
+In case the next piece is not of it’s color or shape (depending on what is checking at the time) it resets the number to 0 and starts counting the
+other player.
 
 In the following example the Heuristic is checking first if there is and objects
 in the current position. Since there is one, the Heuristic is checking what
-colour that object has. Since the colour is equal to last turns colour there
+color that object has. Since the color is equal to last turns colour there
 is an the addition of 1 for the upcoming pieces.
 
 ![heuristic_01](heuristic_01.png)
@@ -122,11 +138,10 @@ possibility to put another piece above that piece in the next turn, he gets
 
 This means that this Heuristic depends on giving values to the pieces depending
 on the best possible move so if there is a possibility on winning ZetaHeuristic
-will keep on adding points to the pieces that land on that favourable position.
+will keep on adding points to the pieces that land on that favorable position.
 The better the position and amount in row the more points and, the less
-favourable position and amount in row the less the points. After that the whole
-cycle starts again but this time instead of checking the colours it will check
-the form of the objects.
+favorable position and amount in row the less the points. After that the whole
+cycle starts again but this time instead of checking the colours it will check the form of the objects.
 
 ![heuristic_cycle](heuristic_cycle.png)
 
