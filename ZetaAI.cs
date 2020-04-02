@@ -4,6 +4,9 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
+/// <summary>
+/// The main brain of the AI having the NegaMax algorithm
+/// </summary>
 public class ZetaAI : AbstractThinker
 {
     // Heuristic win scor
@@ -15,9 +18,10 @@ public class ZetaAI : AbstractThinker
     // Variable for storing the heuristic class
     private readonly ZetaHeuristic heuristic;
 
-    // StopWatches to mesure time
+    // StopWatches to mesure the total time it ran
     private readonly Stopwatch timer;
 
+    // StopWatch to mesure the time NegaMax is taking
     private readonly Stopwatch functionTime;
 
     /// <summary>
@@ -44,7 +48,7 @@ public class ZetaAI : AbstractThinker
     /// </summary>
     /// <param name="board"> The current state of the board </param>
     /// <param name="ct"> A cancelletion token </param>
-    /// <returns></returns>
+    /// <returns> The intended future move </returns>
     public override FutureMove Think(Board board, CancellationToken ct)
     {
         // Starts the timer for the whole AI
@@ -56,8 +60,8 @@ public class ZetaAI : AbstractThinker
         // Starts the timer for running the function at one depth
         functionTime.Restart();
 
-        (FutureMove move, float value) toReturn = NegaMax(board, board.Turn
-            , 0, float.NegativeInfinity, float.PositiveInfinity, ct);
+        (FutureMove move, float value) toReturn = NegaMax(board, board.Turn,
+            0, float.NegativeInfinity, float.PositiveInfinity, ct);
 
         // Stops the timer after the function ends
         functionTime.Stop();
@@ -73,12 +77,12 @@ public class ZetaAI : AbstractThinker
             // Increments the depth by one
             maxDepth++;
 
-            // Starts the timer for running the function at one depth
+            // Restarts the timer for running the function at one depth
             functionTime.Restart();
 
             // Calss the NegaMax method returning a furture move and value
-            toReturn = NegaMax(board, board.Turn, 0, float.NegativeInfinity
-                , float.PositiveInfinity, ct);
+            toReturn = NegaMax(board, board.Turn, 0, float.NegativeInfinity,
+                float.PositiveInfinity, ct);
 
             // Stops the timer after the function ends
             functionTime.Stop();
@@ -131,8 +135,7 @@ public class ZetaAI : AbstractThinker
         else if (depth == maxDepth)
         {
             // Finds the heuristic value of the board and returns it
-            return (FutureMove.NoMove, heuristic.HeuristicValue(board,
-                turn));
+            return (FutureMove.NoMove, heuristic.HeuristicValue(board, turn));
         }
         // If none of the above
         else
