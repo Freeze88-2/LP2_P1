@@ -26,7 +26,7 @@
 ### Describing Algorithmic Search
 
 In our project, we implemented a `NegaMax` algorithm with alpha-beta cuts.
-In the first phase, we implemented the NegaMax algorithm simply using
+In the first phase, we implemented the `NegaMax` algorithm simply using
 `NegativeInfinity` and `PositiveInfinity` to classify each `board`, a test
 placement by the algorithm of a piece on the game board, but with no heuristic
 that could help it discern a good form a bad placement. We decided to start with
@@ -38,7 +38,7 @@ the next chapter, “Heuristic Approach”. Then we added alpha-beta cuts to the
 Finally, the heuristic was perfected up until the conclusion of the project.
 
 The first section of the code overrides the `Think` method, which is mandatory
-for the algorithm to work as an Artificial Intelligence and it’s invoked by the
+for the algorithm to work as an Artificial Intelligence, and it’s invoked by the
 Game Engine. Here we set the `maxDepth` to one and look at the first
 `depth`-level [a `depth`-level is a sort of “inspection level”;
 while it runs, the algorithm will make several test placements, the first level
