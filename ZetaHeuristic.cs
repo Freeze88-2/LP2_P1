@@ -13,7 +13,7 @@ public class ZetaHeuristic
     private int inRowEnemy;
 
     // Number of empty spaces
-    private int emptySpcaces;
+    private int emptySpaces;
 
     // Stores the empty space at the start of the row of this turn
     private Pos? allyPosStart;
@@ -38,8 +38,7 @@ public class ZetaHeuristic
     /// </summary>
     /// <param name="board"> The current board </param>
     /// <param name="turn"> Which turn it is </param>
-    /// <param name="positions"> An array on winCorridors </param>
-    /// <returns></returns>
+    /// <returns> The value of the board </returns>
     public float HeuristicValue(Board board, PColor turn)
     {
         // Stores the value of the board
@@ -48,6 +47,7 @@ public class ZetaHeuristic
         // A loop for every array in positions
         foreach (IEnumerable rows in board.winCorridors)
         {
+            // Resets the values needed for the next check
             ResetValues();
 
             // A loop for every Pos in the array of positions
@@ -58,6 +58,7 @@ public class ZetaHeuristic
                     boardValue, false);
             }
 
+            // Resets the values needed for the next check
             ResetValues();
 
             // A loop for every Pos in the array of positions
@@ -82,7 +83,7 @@ public class ZetaHeuristic
         // Resets the value of in row pieces of the other turn
         inRowEnemy = 0;
         // Resets the number of empty spaces
-        emptySpcaces = 0;
+        emptySpaces = 0;
 
         // Stores the empty space at the start of the row of this turn
         allyPosStart = null;
@@ -166,11 +167,11 @@ public class ZetaHeuristic
                 otherPosEnd = pos;
 
             // Increments the number of empty spaces by one
-            emptySpcaces++;
+            emptySpaces++;
         }
 
         // Checks if there's more than 1 empty spaces
-        if (emptySpcaces >= 2 || inRowFriend == inSequence ||
+        if (emptySpaces >= 2 || inRowFriend == inSequence ||
             inRowEnemy == inSequence)
         {
             // Cheks if the number in row of this turn is the same of in
