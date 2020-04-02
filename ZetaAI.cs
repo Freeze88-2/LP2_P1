@@ -56,14 +56,11 @@ public class ZetaAI : AbstractThinker
         // Starts the timer for running the function at one depth
         functionTime.Restart();
 
-        (FutureMove move, float value) b = NegaMax(board.Copy(), board.Turn
+        (FutureMove move, float value) toReturn = NegaMax(board, board.Turn
             , 0, float.NegativeInfinity, float.PositiveInfinity, ct);
 
         // Stops the timer after the function ends
         functionTime.Stop();
-
-        // Resets the maximum depth to 0
-        maxDepth = 0;
 
         // Number of boards one cycle takes
         int boardCount = board.cols * 2;
@@ -76,18 +73,24 @@ public class ZetaAI : AbstractThinker
             // Increments the depth by one
             maxDepth++;
 
+            // Starts the timer for running the function at one depth
+            functionTime.Restart();
+
             // Calss the NegaMax method returning a furture move and value
-            b = NegaMax(board.Copy(), board.Turn, 0, float.NegativeInfinity
+            toReturn = NegaMax(board, board.Turn, 0, float.NegativeInfinity
                 , float.PositiveInfinity, ct);
 
-            if (b.value == winScore)
+            // Stops the timer after the function ends
+            functionTime.Stop();
+
+            if (toReturn.value == winScore)
                 break;
         }
         // Stops the timer
         timer.Stop();
 
         // Returns the intended move
-        return b.move;
+        return toReturn.move;
     }
 
     /// <summary>
