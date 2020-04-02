@@ -1,16 +1,37 @@
 ﻿using ColorShapeLinks.Common;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
+/// <summary>
+/// Responsible for the Heuristic of ZetaAIs
+/// </summary>
 public class ZetaHeuristic
 {
     // Number of pieces in row of this turn
     private int inRowFriend;
+
     // Number of pieces in row of the other turn
     private int inRowEnemy;
-    // Number of empty spaces 
+
+    // Number of empty spaces
     private int emptySpcaces;
+
+    // Stores the empty space at the start of the row of this turn
+    private Pos? allyPosStart;
+
+    // Stores the empty space at the end of the row of this turn
+    private Pos? allyPosEnd;
+
+    // Stores the empty space at the start of the row of the other turn
+    private Pos? otherPosStart;
+
+    // Stores the empty space at the end of the row of the other turn
+    private Pos? otherPosEnd;
+
+    // Stores the empty space in the middle of a row of this turn
+    private Pos? allyMiddlePiece;
+
+    // Stores the empty space in the middle of a row of the other turn
+    private Pos? otherMiddlePiece;
 
     /// <summary>
     /// Gets the heuristic value of the board received
@@ -19,36 +40,15 @@ public class ZetaHeuristic
     /// <param name="turn"> Which turn it is </param>
     /// <param name="positions"> An array on winCorridors </param>
     /// <returns></returns>
-    public float HeuristicValue(Board board, PColor turn,
-        IEnumerable<Pos>[] positions)
+    public float HeuristicValue(Board board, PColor turn)
     {
         // Stores the value of the board
         float boardValue = 0;
 
         // A loop for every array in positions
-        foreach (IEnumerable rows in positions)
+        foreach (IEnumerable rows in board.winCorridors)
         {
-            // Sets the number of pieces of this turn to 0
-            inRowFriend = 0;
-            // Sets the number of pieces of the other turn to 0
-            inRowEnemy = 0;
-            // Set's the number of empty spaces to 0
-            emptySpcaces = 0;
-
-            // A loop for every Pos in the array of positions
-            foreach (Pos pos in rows)
-            {
-                // Sets the boardValue to what's returned by the function
-                boardValue = CheckInRowAmount(board, pos, turn,
-                    boardValue, true);
-            }
-
-            // Resets the value of in row pieces of this turn
-            inRowFriend = 0;
-            // Resets the value of in row pieces of the other turn
-            inRowEnemy = 0;
-            // Resets the number of empty spaces
-            emptySpcaces = 0;
+            ResetValues();
 
             // A loop for every Pos in the array of positions
             foreach (Pos pos in rows)
@@ -57,9 +57,47 @@ public class ZetaHeuristic
                 boardValue = CheckInRowAmount(board, pos, turn,
                     boardValue, false);
             }
+
+            ResetValues();
+
+            // A loop for every Pos in the array of positions
+            foreach (Pos pos in rows)
+            {
+                // Sets the boardValue to what's returned by the function
+                boardValue = CheckInRowAmount(board, pos, turn,
+                    boardValue, true);
+            }
         }
         // Returns the AI the heuristic value of the board
         return boardValue;
+    }
+
+    /// <summary>
+    /// Resets the values of the positions, empty spaces and how many in line
+    /// </summary>
+    private void ResetValues()
+    {
+        // Resets the value of in row pieces of this turn
+        inRowFriend = 0;
+        // Resets the value of in row pieces of the other turn
+        inRowEnemy = 0;
+        // Resets the number of empty spaces
+        emptySpcaces = 0;
+
+        // Stores the empty space at the start of the row of this turn
+        allyPosStart = null;
+        // Stores the empty space at the end of the row of this turn
+        allyPosEnd = null;
+
+        // Stores the empty space at the start of the row of the other turn
+        otherPosStart = null;
+        // Stores the empty space at the end of the row of the other turn
+        otherPosEnd = null;
+
+        // Stores the empty space in the middle of a row of this turn
+        allyMiddlePiece = null;
+        // Stores the empty space in the middle of a row of the other turn
+        otherMiddlePiece = null;
     }
 
     /// <summary>
@@ -76,21 +114,6 @@ public class ZetaHeuristic
     {
         // Variable for storing the number of pieces in sequence -1
         int inSequence = board.piecesInSequence - 1;
-
-        // Stores the empty space at the start of the row of this turn
-        Pos allyPosStart = new Pos();
-        // Stores the empty space at the end of the row of this turn
-        Pos allyPosEnd = new Pos();
-
-        // Stores the empty space at the start of the row of the other turn
-        Pos otherPosStart = new Pos();
-        // Stores the empty space at the end of the row of the other turn
-        Pos otherPosEnd = new Pos();
-
-        // Stores the empty space in the middle of a row of this turn
-        Pos allyMiddlePiece = new Pos();
-        // Stores the empty space in the middle of a row of the other turn
-        Pos otherMiddlePiece = new Pos();
 
         // Checks if the board has value at the give position
         if (board[pos.row, pos.col].HasValue)
@@ -121,40 +144,42 @@ public class ZetaHeuristic
             {
                 // Sets the postion of the starting empty space to the pos
                 allyPosStart = pos;
-                // Subtracts one to the number of empty spaces
-                emptySpcaces -= 1;
             }
             // If there's only one empty space sets the middle space to pos
-            else if (emptySpcaces == 1) allyMiddlePiece = pos;
+            if (inRowFriend > 0 && !allyMiddlePiece.HasValue) 
+                allyMiddlePiece = pos;
             // If there's already a piece in row sets the end pos to the pos
-            else if (inRowFriend > 1) allyPosEnd = pos;
+            else if (inRowFriend > 1)
+                allyPosEnd = pos;
 
             // Checks if the other turn already has pieces in row
             if (inRowEnemy == 0)
             {
                 // Sets the postion of the starting empty space to the pos
                 otherPosStart = pos;
-                // Subtracts one to the number of empty spaces
-                emptySpcaces -= 1;
             }
             // If there's only one empty space sets the middle space to pos
-            else if (emptySpcaces == 1) otherMiddlePiece = pos;
+            if (inRowEnemy > 0 && !otherMiddlePiece.HasValue) 
+                otherMiddlePiece = pos;
             // If there's already a piece in row sets the end pos to the pos
-            else if (inRowEnemy > 1) otherPosEnd = pos;
+            else if (inRowEnemy > 1)
+                otherPosEnd = pos;
 
             // Increments the number of empty spaces by one
             emptySpcaces++;
         }
 
         // Checks if there's more than 1 empty spaces
-        if (emptySpcaces >= 2)
+        if (emptySpcaces >= 2 || inRowFriend == inSequence ||
+            inRowEnemy == inSequence)
         {
             // Cheks if the number in row of this turn is the same of in
             // Sequence or insequence minus one
-            if (inRowFriend == inSequence || inRowFriend == inSequence - 1)
+            if (inRowFriend > 1)
             {
+                boardValue += inRowFriend * inRowFriend;
                 // Checks how good the sequence is and assigns it to board
-                boardValue = CheckInRowViability(board, boardValue,
+                boardValue += CheckInRowViability(board,
                     allyPosStart, allyPosEnd, allyMiddlePiece, inRowFriend);
 
                 // Rests the inrow to zero
@@ -162,18 +187,17 @@ public class ZetaHeuristic
             }
             // Cheks if the number in row of the other turn is the same of in
             // Sequence or insequence minus one
-            if (inRowEnemy == inSequence || inRowEnemy == inSequence - 1)
+            if (inRowEnemy > 1)
             {
-                boardValue = CheckInRowViability(board, boardValue,
+                boardValue -= inRowEnemy * inRowEnemy;
+                // Checks how good the sequence is and assigns it to board
+                boardValue -= CheckInRowViability(board,
                     otherPosStart, otherPosEnd, otherMiddlePiece, inRowEnemy);
 
                 // Rests the inrow to zero
                 inRowEnemy = 0;
             }
         }
-        // In case the rows don't have viability assigns the in row of this
-        // turn minus the in row of the other turn
-        boardValue += inRowFriend * inRowFriend - inRowEnemy * inRowEnemy;
         // Returns the value of the board
         return boardValue;
     }
@@ -188,61 +212,123 @@ public class ZetaHeuristic
     /// <param name="mid"> The empty space in the middle of the row </param>
     /// <param name="multiplyValue"> The value multiplier </param>
     /// <returns> The value of the board </returns>
-    private float CheckInRowViability(Board board, float boardValue,
-        Pos start, Pos end, Pos mid, int multiplyValue)
+    private float CheckInRowViability(Board board,
+        Pos? start, Pos? end, Pos? mid, int multiplyValue)
     {
+        float boardValue = 0;
         // Checks if the start and end with one subtracted is 0 or bigger
-        if (start.row - 1 >= 0 && end.row - 1 >= 0)
+        if (start?.row - 1 >= 0 && end?.row - 1 >= 0)
         {
             // Checks if the start and end is empty and below that is a piece
-            if ((!board[start.row, start.col].HasValue && board[start.row - 1,
-                start.col].HasValue) && (!board[end.row, end.col].HasValue &&
-                board[end.row - 1, end.col].HasValue))
+            if ((!board[start.Value.row, start.Value.col].HasValue &&
+                board[start.Value.row - 1, start.Value.col].HasValue) &&
+                (!board[end.Value.row, end.Value.col].HasValue &&
+                board[end.Value.row - 1, end.Value.col].HasValue))
             {
                 // Adds 1000 multiplied my the pieces in row to the boardValue
                 boardValue += 1000 * multiplyValue;
             }
         }
         // Checks if the start with one subtracted is 0 or bigger
-        else if (start.row - 1 >= 0)
+        else if (start?.row - 1 >= 0)
         {
             // Checks if start is empty and the below that is a piece
-            if (!board[start.row, start.col].HasValue && board[start.row - 1,
-                start.col].HasValue)
+            if (!board[start.Value.row, start.Value.col].HasValue &&
+                board[start.Value.row - 1, start.Value.col].HasValue)
             {
                 // Adds 50 multiplied my the pieces in row to the boardValue
                 boardValue += 50 * multiplyValue;
             }
         }
         // Checks if the end with one subtracted is 0 or bigger
-        else if (end.row - 1 >= 0)
+        else if (end?.row - 1 >= 0)
         {
             // Checks if end is empty and the below that is a piece
-            if (!board[end.row, end.col].HasValue && board[end.row - 1,
-                end.col].HasValue)
+            if (!board[end.Value.row, end.Value.col].HasValue &&
+                board[end.Value.row - 1, end.Value.col].HasValue)
             {
                 // Adds 50 multiplied my the pieces in row to the boardValue
                 boardValue += 50 * multiplyValue;
             }
         }
         // Checks if the middle with one subtracted is 0 or bigger
-        else if (mid.row - 1 >= 0)
+        else if (mid?.row - 1 >= 0)
         {
             // Checks if middle is empty and the below that is a piece
-            if (!board[mid.row, mid.col].HasValue && board[mid.row - 1,
-                mid.col].HasValue)
+            if (!board[mid.Value.row, mid.Value.col].HasValue &&
+                board[mid.Value.row - 1, mid.Value.col].HasValue)
             {
                 // Adds 50 multiplied my the pieces in row to the boardValue
                 boardValue += 50 * multiplyValue;
             }
         }
         // checks if any of the positions are empty spaces
-        else if (!board[mid.row, mid.col].HasValue 
-            || !board[end.row, end.col].HasValue 
-            || !board[start.row, start.col].HasValue)
+
+        if (mid.HasValue)
         {
-            // Adds 10 multiplied my the pieces in row to the boardValue
-            boardValue += 10 * multiplyValue;
+            if (!board[mid.Value.row, mid.Value.col].HasValue)
+            {
+                // Adds 10 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
+        }
+        else if (end.HasValue)
+        {
+            if (!board[end.Value.row, end.Value.col].HasValue)
+            {
+                // Adds 10 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
+        }
+        else if (start.HasValue)
+        {
+            if (!board[start.Value.row, start.Value.col].HasValue)
+            {
+                // Adds 10 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
+        }
+
+        // Checks if the start and end with one subtracted is 0 or bigger
+        if (start?.row == 0 && end?.row == 0)
+        {
+            // Checks if the start and end is empty and below that is a piece
+            if (!board[start.Value.row, start.Value.col].HasValue
+                && !board[end.Value.row, end.Value.col].HasValue)
+            {
+                // Adds 1000 multiplied my the pieces in row to the boardValue
+                boardValue += 1000 * multiplyValue;
+            }
+        }
+        // Checks if the start with one subtracted is 0 or bigger
+        else if (start?.row == 0)
+        {
+            // Checks if start is empty and the below that is a piece
+            if (!board[start.Value.row, start.Value.col].HasValue)
+            {
+                // Adds 50 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
+        }
+        // Checks if the end with one subtracted is 0 or bigger
+        else if (end?.row == 0)
+        {
+            // Checks if end is empty and the below that is a piece
+            if (!board[end.Value.row, end.Value.col].HasValue)
+            {
+                // Adds 50 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
+        }
+        // Checks if the middle with one subtracted is 0 or bigger
+        else if (mid?.row == 0)
+        {
+            // Checks if middle is empty and the below that is a piece
+            if (!board[mid.Value.row, mid.Value.col].HasValue)
+            {
+                // Adds 50 multiplied my the pieces in row to the boardValue
+                boardValue += 10 * multiplyValue;
+            }
         }
 
         // Resturns the value of the board
